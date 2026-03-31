@@ -241,6 +241,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ## 👥 Autores
 
 - **Eduardo L. Cavalcante** - [GitHub](https://github.com/EduardoLCavalcante)
+- **Pedro Aumério** - [GitHub](https://github.com/Pedroaumerio)
 
 ---
 
