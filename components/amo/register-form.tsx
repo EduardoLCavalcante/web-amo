@@ -15,6 +15,7 @@ export function RegisterForm() {
     e.preventDefault()
     // Lógica de cadastro será implementada posteriormente
     console.log("Register attempt:", { email, password, confirmPassword })
+    router.push("/verificar-codigo")
   }
 
   return (
