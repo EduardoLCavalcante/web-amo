@@ -17,13 +17,13 @@ export function MonitorRegisterInput({
   const [isFocused, setIsFocused] = React.useState(false)
 
   return (
-    <div className="flex w-full items-center gap-3">
+    <div className="flex w-full flex-col gap-1.5">
       {label && (
-        <span className="w-[90px] shrink-0 text-right text-sm font-medium text-[#546E7A]">
+        <span className="text-sm font-medium text-[#546E7A] pl-1">
           {label}
         </span>
       )}
-      <div className="relative flex-1">
+      <div className="relative w-full">
         <input
           type={type}
           placeholder={placeholder}

@@ -29,37 +29,12 @@ export function MonitorRegisterForm() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-white">
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-[#E8F4FB] bg-white px-5 py-4 shadow-sm">
-        <button
-          type="button"
-          aria-label="Menu"
-          id="monitor-menu-btn"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-[#48CAE4] transition-all duration-200 hover:bg-[#48CAE4]/10"
-        >
-          <Menu className="h-6 w-6" strokeWidth={2} />
-        </button>
-
-        <h1 className="text-base font-semibold tracking-wide text-[#48CAE4]">
-          adicionar monitor
-        </h1>
-
-        <button
-          type="button"
-          aria-label="Notificações"
-          id="monitor-notification-btn"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-[#48CAE4] transition-all duration-200 hover:bg-[#48CAE4]/10"
-        >
-          <Bell className="h-5 w-5" strokeWidth={2} />
-        </button>
-      </header>
-
       {/* Conteúdo */}
       <main className="flex flex-1 flex-col items-center px-6 pt-8">
         <div className="flex w-full max-w-md flex-col items-center gap-8">
 
           {/* Logo */}
-          <div className="h-[80px] w-[80px]">
+          <div className="h-16 w-full">
             <img
               src="/logo.png"
               alt="AMO Logo"
@@ -74,7 +49,7 @@ export function MonitorRegisterForm() {
             id="monitor-register-form"
           >
             <MonitorRegisterInput
-              label="nome:"
+              label="Nome:"
               placeholder="digite o nome..."
               value={nome}
               onChange={(e) => setNome(e.target.value)}
@@ -84,7 +59,7 @@ export function MonitorRegisterForm() {
             />
 
             <MonitorRegisterInput
-              label="e-mail:"
+              label="E-mail:"
               type="email"
               placeholder="digite o e-mail..."
               value={email}
@@ -95,7 +70,7 @@ export function MonitorRegisterForm() {
             />
 
             <MonitorRegisterInput
-              label="disciplina:"
+              label="Disciplina:"
               placeholder="digite a disciplina..."
               value={disciplina}
               onChange={(e) => setDisciplina(e.target.value)}
@@ -104,7 +79,7 @@ export function MonitorRegisterForm() {
             />
 
             <MonitorRegisterInput
-              label="matrícula:"
+              label="Matrícula:"
               placeholder="digite a matrícula..."
               value={matricula}
               onChange={(e) => setMatricula(e.target.value)}
@@ -120,7 +95,7 @@ export function MonitorRegisterForm() {
             )}
 
             {/* Espaçador */}
-            <div className="min-h-[60px]" />
+            <div  />
 
             {/* Botão Cadastrar */}
             <button
@@ -159,84 +134,6 @@ export function MonitorRegisterForm() {
           </form>
         </div>
       </main>
-
-      {/* Bottom Nav */}
-      <nav className="flex items-center justify-around border-t border-[#E8F4FB] bg-white px-6 py-3 shadow-[0_-2px_8px_rgba(0,119,182,0.06)]">
-        {/* Professores */}
-        <button
-          type="button"
-          aria-label="Professores"
-          id="nav-professors"
-          className="flex flex-col items-center gap-1 text-[#B0BEC5] transition-colors hover:text-[#48CAE4]"
-        >
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8}>
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
-          <span className="text-[10px]">professores</span>
-        </button>
-
-        {/* Calendário */}
-        <button
-          type="button"
-          aria-label="Calendário"
-          id="nav-calendar"
-          className="flex flex-col items-center gap-1 text-[#B0BEC5] transition-colors hover:text-[#48CAE4]"
-        >
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8}>
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
-          <span className="text-[10px]">calendário</span>
-        </button>
-
-        {/* Monitores (ativo) */}
-        <button
-          type="button"
-          aria-label="Monitores"
-          id="nav-monitors"
-          className="flex flex-col items-center gap-1 text-[#48CAE4]"
-        >
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8}>
-            <path d="M12 14c-4 0-7 2-7 4v1h14v-1c0-2-3-4-7-4z" />
-            <circle cx="12" cy="8" r="4" />
-            <path d="M16 3.5a4 4 0 0 1 0 7" />
-          </svg>
-          <span className="text-[10px] font-medium">monitores</span>
-        </button>
-
-        {/* Notificações */}
-        <button
-          type="button"
-          aria-label="Notificações"
-          id="nav-notifications"
-          className="flex flex-col items-center gap-1 text-[#B0BEC5] transition-colors hover:text-[#48CAE4]"
-        >
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8}>
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          <span className="text-[10px]">notificações</span>
-        </button>
-
-        {/* Perfil */}
-        <button
-          type="button"
-          aria-label="Perfil"
-          id="nav-profile"
-          className="flex flex-col items-center gap-1 text-[#B0BEC5] transition-colors hover:text-[#48CAE4]"
-        >
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8}>
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
-          <span className="text-[10px]">perfil</span>
-        </button>
-      </nav>
     </div>
   )
 }
