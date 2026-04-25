@@ -12,19 +12,26 @@ export function ProfessorRegisterInput({
   label,
   type = "text",
   placeholder,
+  id,
   ...props
 }: ProfessorRegisterInputProps) {
   const [isFocused, setIsFocused] = React.useState(false)
+  const generatedId = React.useId()
+  const inputId = id ?? (label ? generatedId : undefined)
 
   return (
-    <div className="flex w-full items-center gap-3">
+    <div className="flex w-full flex-col gap-1.5">
       {label && (
-        <span className="w-[90px] shrink-0 text-right text-sm font-medium text-[#546E7A]">
+        <label
+          htmlFor={inputId}
+          className="text-sm font-medium text-[#546E7A] pl-1"
+        >
           {label}
-        </span>
+        </label>
       )}
-      <div className="relative flex-1">
+      <div className="relative w-full">
         <input
+          id={inputId}
           type={type}
           placeholder={placeholder}
           onFocus={() => setIsFocused(true)}
