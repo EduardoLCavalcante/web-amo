@@ -19,7 +19,7 @@ import type { NextRequest } from 'next/server'
  */
 export function proxy(request: NextRequest) {
   // Rotas públicas que não requerem autenticação
-  const publicRoutes = ['/', '/cadastro']
+  const publicRoutes = ['/', '/cadastro', '/cadastro-professor']
   
   // Rotas protegidas que requerem autenticação (futuro)
   const protectedRoutes = ['/dashboard', '/perfil', '/configuracoes']
