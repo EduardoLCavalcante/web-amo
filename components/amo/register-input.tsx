@@ -21,7 +21,7 @@ export function RegisterInput({ className, type, placeholder, ...props }: Regist
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         className={cn(
-          "h-14 w-full rounded-[20px] border-2 bg-white px-5 text-[#0077B6] transition-all duration-200",
+          "h-14 w-full rounded-[20px] border-2 bg-white px-5 text-[#024284] transition-all duration-200",
           "placeholder:text-[#48CAE4] placeholder:font-medium",
           "focus:outline-none focus:ring-0",
           isFocused
@@ -36,7 +36,7 @@ export function RegisterInput({ className, type, placeholder, ...props }: Regist
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-[#48CAE4] hover:text-[#0077B6] transition-colors duration-200"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-[#48CAE4] hover:text-[#024284] transition-colors duration-200"
           aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
         >
           {showPassword ? (

@@ -8,11 +8,15 @@ import { RegisterInput } from "./register-input"
 export function ForgotPasswordForm() {
   const router = useRouter()
   const [email, setEmail] = React.useState("")
+  const [message, setMessage] = React.useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Lógica de redefinição será implementada posteriormente
-    console.log("Reset password attempt:", { email })
+    if (!email.trim().includes("@")) {
+      setMessage("Informe um e-mail valido.")
+      return
+    }
+    window.location.href = `mailto:pae@ufc.br?subject=Recuperacao%20de%20senha%20AMO&body=Solicito%20orientacoes%20para%20redefinir%20a%20senha%20do%20email%20${encodeURIComponent(email)}`
   }
 
   return (
@@ -21,7 +25,7 @@ export function ForgotPasswordForm() {
       <button
         type="button"
         onClick={() => router.push("/")}
-        className="absolute left-4 top-8 flex items-center justify-center rounded-full p-1 text-[#48CAE4] hover:text-[#0077B6] hover:bg-[#48CAE4]/10 transition-all duration-200"
+        className="absolute left-4 top-8 flex items-center justify-center rounded-full p-1 text-[#48CAE4] hover:text-[#024284] hover:bg-[#48CAE4]/10 transition-all duration-200"
         aria-label="Voltar"
       >
         <ChevronLeft className="h-7 w-7" strokeWidth={2.5} />
@@ -50,6 +54,7 @@ export function ForgotPasswordForm() {
             autoComplete="email"
             required
           />
+          {message ? <div className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700">{message}</div> : null}
 
           {/* Espaçador flexível */}
           <div className="min-h-[160px] flex-1" />
@@ -59,7 +64,7 @@ export function ForgotPasswordForm() {
             type="submit"
             className="h-14 w-full rounded-2xl bg-[#48CAE4] text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-[#3BB5CF] hover:shadow-xl active:scale-[0.98]"
           >
-            Redefinir senha
+            Mandar email
           </button>
         </form>
       </div>

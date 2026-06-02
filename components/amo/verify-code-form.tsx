@@ -17,8 +17,7 @@ export function VerifyCodeForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!isComplete) return
-    // Lógica de verificação será implementada posteriormente
-    console.log("Verify code attempt:", { code })
+    router.push("/cadastro-dados")
   }
 
   const handleCodeComplete = (value: string) => {
@@ -38,7 +37,7 @@ export function VerifyCodeForm() {
         </div>
 
         {/* Título */}
-        <h1 className="text-xl font-bold text-[#0077B6]">Inserir código</h1>
+        <h1 className="text-xl font-bold text-[#024284]">Inserir código</h1>
 
         {/* Descrição */}
         <p className="text-center text-base leading-relaxed text-[#2D3748]">
@@ -64,7 +63,7 @@ export function VerifyCodeForm() {
                 <InputOTPSlot
                   key={index}
                   index={index}
-                  className="h-14 w-14 rounded-xl border-2 border-[#B0D4E8] bg-white text-lg font-semibold text-[#0077B6] shadow-none first:rounded-xl last:rounded-xl data-[active=true]:border-[#48CAE4] data-[active=true]:ring-[#48CAE4]/20"
+                  className="h-14 w-14 rounded-xl border-2 border-amo-border bg-white text-lg font-semibold text-[#024284] shadow-none first:rounded-xl last:rounded-xl data-[active=true]:border-[#48CAE4] data-[active=true]:ring-[#48CAE4]/20"
                 />
               ))}
             </InputOTPGroup>
@@ -77,7 +76,7 @@ export function VerifyCodeForm() {
           <button
             type="submit"
             disabled={!isComplete}
-            className="h-14 w-full rounded-2xl bg-[#1B3A5C] text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-[#162F4A] hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+            className="h-14 w-full rounded-2xl bg-[#024284] text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-[#1B3A5C] hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
           >
             Verificar código
           </button>

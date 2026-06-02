@@ -37,7 +37,7 @@ export function ProfessorRegisterInput({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className={cn(
-            "h-12 w-full rounded-[20px] border-2 bg-white px-5 text-sm text-[#0077B6] transition-all duration-200",
+            "h-12 w-full rounded-[20px] border-2 bg-white px-5 text-sm text-[#024284] transition-all duration-200",
             "placeholder:text-[#48CAE4]/80 placeholder:font-normal",
             "focus:outline-none focus:ring-0",
             isFocused

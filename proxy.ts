@@ -18,32 +18,32 @@ import type { NextRequest } from 'next/server'
  * ```
  */
 export function proxy(request: NextRequest) {
-  // Rotas públicas que não requerem autenticação
-  const publicRoutes = ['/', '/cadastro', '/cadastro-professor']
-  
-  // Rotas protegidas que requerem autenticação (futuro)
-  const protectedRoutes = ['/dashboard', '/perfil', '/configuracoes']
-  
   const { pathname } = request.nextUrl
+  const publicRoutes = [
+    '/',
+    '/cadastro',
+    '/cadastro-dados',
+    '/cadastro-foto',
+    '/cadastro-final',
+    '/cadastro-professor',
+    '/cadastro-monitor',
+    '/esqueci-senha',
+    '/verificar-codigo',
+    '/cursos',
+    '/monitorias',
+  ]
+  const isPublicRoute = publicRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`))
+  const token = request.cookies.get('amo-session')?.value
 
-  // Verifica se é uma rota protegida
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
-  )
+  if (!isPublicRoute && !token) {
+    const loginUrl = new URL('/', request.url)
+    loginUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
 
-  // TODO: Implementar verificação de autenticação quando o backend estiver pronto
-  // const token = request.cookies.get('auth-token')?.value
-  // 
-  // if (isProtectedRoute && !token) {
-  //   const loginUrl = new URL('/', request.url)
-  //   loginUrl.searchParams.set('redirect', pathname)
-  //   return NextResponse.redirect(loginUrl)
-  // }
-  //
-  // // Redirecionar usuário autenticado para dashboard se tentar acessar login
-  // if (token && pathname === '/') {
-  //   return NextResponse.redirect(new URL('/dashboard', request.url))
-  // }
+  if (token && pathname === '/') {
+    return NextResponse.redirect(new URL('/cursos', request.url))
+  }
 
   return NextResponse.next()
 }
