@@ -89,7 +89,7 @@ export function MonitorRegisterForm() {
 
             {/* Feedback de sucesso */}
             {success && (
-              <p className="text-center text-sm font-medium text-emerald-600">
+              <p className="text-center text-sm font-medium text-[#024284]">
                 Monitor cadastrado com sucesso!
               </p>
             )}
@@ -101,7 +101,7 @@ export function MonitorRegisterForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="h-14 w-full rounded-2xl bg-[#1B3A5C] text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-[#162F4A] hover:shadow-xl active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100"
+              className="h-14 w-full rounded-2xl bg-[#024284] text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-[#1B3A5C] hover:shadow-xl active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100"
               id="monitor-submit-btn"
             >
               {isSubmitting ? (

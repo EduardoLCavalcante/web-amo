@@ -2,20 +2,50 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { type AmoUser, initialAmoState, setAmoSession } from "@/lib/amo/mock-store"
 import { LoginInput } from "./login-input"
 
 export function LoginForm() {
+  const router = useRouter()
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
+  const [error, setError] = React.useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Lógica de autenticação será implementada posteriormente
-    console.log("Login attempt:", { email, password })
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail.includes("@")) {
+      setError("Email invalido!")
+      return
+    }
+    if (password.length < 8) {
+      setError("A senha precisa conter 8 caracteres!")
+      return
+    }
+    const rawState = window.localStorage.getItem("amo-data-v1")
+    const users: AmoUser[] = rawState ? JSON.parse(rawState).users ?? initialAmoState.users : initialAmoState.users
+    const user = users.find(
+      (item) => item.email.toLowerCase() === normalizedEmail && item.password === password && item.active,
+    )
+    if (!user) {
+      setError("Email ou senha nao correspondem a uma conta ativa.")
+      return
+    }
+    setAmoSession(user.id)
+    router.push("/cursos")
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-[#0077B6] to-[#48CAE4] px-6 py-12">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-[#024284] via-[#0077B6] to-[#48CAE4] px-6 py-12">
       <div className="flex w-full max-w-sm flex-col items-center gap-8">
         {/* Logo */}
         <div className="h-[201px] w-[201px] pt-8">
@@ -56,12 +86,26 @@ export function LoginForm() {
             >
               Cadastre-se
             </Link>
+            <Dialog>
+              <DialogTrigger className="text-sm text-white/90 transition-colors hover:text-white">
+                Sobre o aplicativo
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>AMO</DialogTitle>
+                  <DialogDescription>
+                    Plataforma de apoio ao ensino academico e comunidade Russana, com monitorias, forum, agendamentos e frequencias.
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </div>
+          {error ? <div className="rounded-xl bg-white/90 p-3 text-sm font-medium text-red-700">{error}</div> : null}
 
           {/* Botão de Login */}
           <button
             type="submit"
-            className="mt-4 h-14 w-full rounded-2xl bg-white text-lg font-semibold text-[#0077B6] shadow-lg transition-all hover:bg-white/95 hover:shadow-xl active:scale-[0.98]"
+            className="mt-4 h-14 w-full rounded-2xl bg-white text-lg font-semibold text-[#024284] shadow-lg transition-all hover:bg-white/95 hover:shadow-xl active:scale-[0.98]"
           >
             Entrar
           </button>
