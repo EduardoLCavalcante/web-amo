@@ -6,3 +6,5 @@ next-env.d.ts
 node_modules/
 .next/
 .DS_Store
+tsconfig.tsbuildinfo
+.amo-state.json

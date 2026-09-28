@@ -4,19 +4,25 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import { ChevronLeft } from "lucide-react"
 import { RegisterInput } from "./register-input"
+import { apiRequest } from '@/lib/amo/mock-store'
 
 export function ForgotPasswordForm() {
   const router = useRouter()
   const [email, setEmail] = React.useState("")
   const [message, setMessage] = React.useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email.trim().includes("@")) {
       setMessage("Informe um e-mail valido.")
       return
     }
-    window.location.href = `mailto:pae@ufc.br?subject=Recuperacao%20de%20senha%20AMO&body=Solicito%20orientacoes%20para%20redefinir%20a%20senha%20do%20email%20${encodeURIComponent(email)}`
+    try {
+      await apiRequest('auth/recover/start', 'POST', { email })
+      router.push('/verificar-codigo?recover=1')
+    } catch (cause) {
+      setMessage(cause instanceof Error ? cause.message : 'Não foi possível iniciar a recuperação.')
+    }
   }
 
   return (
@@ -64,7 +70,7 @@ export function ForgotPasswordForm() {
             type="submit"
             className="h-14 w-full rounded-2xl bg-[#48CAE4] text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-[#3BB5CF] hover:shadow-xl active:scale-[0.98]"
           >
-            Mandar email
+            Gerar código
           </button>
         </form>
       </div>

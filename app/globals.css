@@ -87,8 +87,8 @@
   --color-amo-deep: var(--amo-deep);
   --color-amo-ice: var(--amo-ice);
   --color-amo-border: var(--amo-border);
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

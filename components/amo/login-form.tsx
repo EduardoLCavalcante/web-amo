@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { type AmoUser, initialAmoState, setAmoSession } from "@/lib/amo/mock-store"
+import { apiRequest } from "@/lib/amo/mock-store"
 import { LoginInput } from "./login-input"
 
 export function LoginForm() {
@@ -20,28 +20,15 @@ export function LoginForm() {
   const [password, setPassword] = React.useState("")
   const [error, setError] = React.useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const normalizedEmail = email.trim().toLowerCase()
-    if (!normalizedEmail.includes("@")) {
-      setError("Email invalido!")
-      return
+    try {
+      await apiRequest('auth/login', 'POST', { email, password })
+      router.push('/cursos')
+      router.refresh()
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Falha no login.')
     }
-    if (password.length < 8) {
-      setError("A senha precisa conter 8 caracteres!")
-      return
-    }
-    const rawState = window.localStorage.getItem("amo-data-v1")
-    const users: AmoUser[] = rawState ? JSON.parse(rawState).users ?? initialAmoState.users : initialAmoState.users
-    const user = users.find(
-      (item) => item.email.toLowerCase() === normalizedEmail && item.password === password && item.active,
-    )
-    if (!user) {
-      setError("Email ou senha nao correspondem a uma conta ativa.")
-      return
-    }
-    setAmoSession(user.id)
-    router.push("/cursos")
   }
 
   return (

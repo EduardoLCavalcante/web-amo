@@ -3,6 +3,8 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { REGEXP_ONLY_DIGITS } from "input-otp"
+import { apiRequest } from '@/lib/amo/mock-store'
+import { Input } from '@/components/ui/input'
 
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 
@@ -11,13 +13,35 @@ const OTP_LENGTH = 6
 export function VerifyCodeForm() {
   const router = useRouter()
   const [code, setCode] = React.useState("")
+  const [demoCode, setDemoCode] = React.useState('')
+  const [recover, setRecover] = React.useState(false)
+  const [verified, setVerified] = React.useState(false)
+  const [newPassword, setNewPassword] = React.useState('')
+  const [error, setError] = React.useState('')
+
+  React.useEffect(() => {
+    const recovery = new URLSearchParams(window.location.search).has('recover')
+    setRecover(recovery)
+    apiRequest<{ code: string }>(recovery ? 'auth/recover/code' : 'auth/register/code').then(data => setDemoCode(data.code)).catch(cause => setError(cause instanceof Error ? cause.message : 'Código indisponível.'))
+  }, [])
 
   const isComplete = code.length === OTP_LENGTH
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isComplete) return
-    router.push("/cadastro-dados")
+    try {
+      if (verified && recover) {
+        await apiRequest('auth/recover/finish', 'POST', { newPassword })
+        router.push('/')
+      } else {
+        if (!isComplete) return
+        await apiRequest(recover ? 'auth/recover/verify' : 'auth/register/verify', 'POST', { code })
+        if (recover) setVerified(true)
+        else router.push('/cadastro-dados')
+      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Código inválido.')
+    }
   }
 
   const handleCodeComplete = (value: string) => {
@@ -41,9 +65,7 @@ export function VerifyCodeForm() {
 
         {/* Descrição */}
         <p className="text-center text-base leading-relaxed text-[#2D3748]">
-          Acabamos de enviar um código{" "}
-          <br />
-          para seu e-mail!
+          Código de demonstração: <strong>{demoCode || '...'}</strong><br />Válido por 10 minutos.
         </p>
 
         {/* Input OTP */}
@@ -51,7 +73,7 @@ export function VerifyCodeForm() {
           onSubmit={handleSubmit}
           className="flex w-full flex-col items-center gap-4 pt-2"
         >
-          <InputOTP
+          {!verified ? <InputOTP
             maxLength={OTP_LENGTH}
             pattern={REGEXP_ONLY_DIGITS}
             value={code}
@@ -67,7 +89,8 @@ export function VerifyCodeForm() {
                 />
               ))}
             </InputOTPGroup>
-          </InputOTP>
+          </InputOTP> : <Input type="password" value={newPassword} onChange={event => setNewPassword(event.target.value)} placeholder="Nova senha" minLength={8} required />}
+          {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
           {/* Espaçador flexível */}
           <div className="min-h-[200px] flex-1" />
@@ -75,10 +98,10 @@ export function VerifyCodeForm() {
           {/* Botão Verificar */}
           <button
             type="submit"
-            disabled={!isComplete}
+            disabled={!verified && !isComplete}
             className="h-14 w-full rounded-2xl bg-[#024284] text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-[#1B3A5C] hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
           >
-            Verificar código
+            {verified ? 'Redefinir senha' : 'Verificar código'}
           </button>
         </form>
       </div>

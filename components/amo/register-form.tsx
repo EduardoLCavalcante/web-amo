@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { ChevronLeft } from "lucide-react"
-import { initialAmoState } from "@/lib/amo/mock-store"
+import { apiRequest } from "@/lib/amo/mock-store"
 import { RegisterInput } from "./register-input"
 
 export function RegisterForm() {
@@ -13,7 +13,7 @@ export function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = React.useState("")
   const [error, setError] = React.useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const normalizedEmail = email.trim().toLowerCase()
     if (!normalizedEmail.includes("@")) {
@@ -32,12 +32,12 @@ export function RegisterForm() {
       setError("As senhas devem ser iguais!")
       return
     }
-    if (initialAmoState.users.some((user) => user.email.toLowerCase() === normalizedEmail)) {
-      setError("Endereco de email ja esta em uso!")
-      return
+    try {
+      await apiRequest('auth/register/start', 'POST', { email: normalizedEmail, password })
+      router.push('/verificar-codigo')
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Falha no cadastro.')
     }
-    window.localStorage.setItem("amo-pending-register", JSON.stringify({ email: normalizedEmail, password }))
-    router.push("/verificar-codigo")
   }
 
   return (

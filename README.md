@@ -61,6 +61,17 @@ npm run dev
 
 Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 
+O backend de demonstração roda nas rotas `/api` do próprio Next.js. Os dados e sessões ficam em memória e são reiniciados junto com o servidor. Para testar os perfis:
+
+| Perfil | E-mail | Senha |
+| --- | --- | --- |
+| Aluno | `camila.nunes@amo.edu` | `aluno123` |
+| Monitor | `lucas.freire@amo.edu` | `monitor1` |
+| Professor | `helena.duarte@amo.edu` | `prof1234` |
+| Administrador | `admin@amo.edu` | `admin123` |
+
+O teste HTTP dos fluxos e permissões pode ser executado com `node scripts/http-smoke.mjs` enquanto o servidor local estiver ativo.
+
 ---
 
 ## 🛠️ Scripts Disponíveis
@@ -194,9 +205,6 @@ refactor: reorganiza estrutura de pastas
 Crie um arquivo `.env.local` na raiz do projeto:
 
 ```env
-# API
-NEXT_PUBLIC_API_URL=http://localhost:3001
-
 # Analytics (opcional)
 NEXT_PUBLIC_VERCEL_ANALYTICS_ID=your-analytics-id
 ```
@@ -225,10 +233,10 @@ Contribuições são bem-vindas! Veja o [Guia de Contribuição](docs/CONTRIBUTI
 - [x] Página 404 personalizada
 - [x] Estado de loading global
 - [x] Middleware base
-- [ ] Integração com backend
+- [x] Backend mockado nas rotas HTTP do Next.js
 - [ ] Dashboard do usuário
-- [ ] Sistema de recuperação de senha
-- [ ] Perfil do usuário
+- [x] Sistema de recuperação de senha
+- [x] Perfil do usuário
 
 ---
 

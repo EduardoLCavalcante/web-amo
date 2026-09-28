@@ -29,8 +29,6 @@ export function proxy(request: NextRequest) {
     '/cadastro-monitor',
     '/esqueci-senha',
     '/verificar-codigo',
-    '/cursos',
-    '/monitorias',
   ]
   const isPublicRoute = publicRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`))
   const token = request.cookies.get('amo-session')?.value
@@ -39,10 +37,6 @@ export function proxy(request: NextRequest) {
     const loginUrl = new URL('/', request.url)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
-  }
-
-  if (token && pathname === '/') {
-    return NextResponse.redirect(new URL('/cursos', request.url))
   }
 
   return NextResponse.next()

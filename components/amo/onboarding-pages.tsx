@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { initialAmoState, useAmoStore } from '@/lib/amo/mock-store'
+import { apiRequest, type AmoCourse } from '@/lib/amo/mock-store'
 
 function Shell({ children, title }: { children: React.ReactNode; title: string }) {
   const router = useRouter()
@@ -44,9 +44,14 @@ export function RegisterDataPage() {
   const [displayName, setDisplayName] = React.useState('')
   const [registration, setRegistration] = React.useState('')
   const [entryYear, setEntryYear] = React.useState('2026')
-  const [courseId, setCourseId] = React.useState(initialAmoState.courses[0].id)
+  const [courseId, setCourseId] = React.useState('')
+  const [courses, setCourses] = React.useState<AmoCourse[]>([])
   const [birthDate, setBirthDate] = React.useState('')
   const [error, setError] = React.useState('')
+
+  React.useEffect(() => {
+    apiRequest<{ courses: AmoCourse[] }>('catalog').then(data => { setCourses(data.courses); setCourseId(data.courses[0]?.id ?? '') }).catch(cause => setError(cause instanceof Error ? cause.message : 'Cursos indisponíveis.'))
+  }, [])
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault()
@@ -54,8 +59,7 @@ export function RegisterDataPage() {
       setError('Existem campos em branco.')
       return
     }
-    const pending = JSON.parse(window.localStorage.getItem('amo-pending-register') ?? '{}')
-    window.localStorage.setItem('amo-pending-register', JSON.stringify({ ...pending, name, displayName, registration, entryYear, courseId, birthDate }))
+    window.sessionStorage.setItem('amo-pending-register', JSON.stringify({ name, displayName, registration, entryYear, courseId, birthDate }))
     router.push('/cadastro-foto')
   }
 
@@ -66,7 +70,7 @@ export function RegisterDataPage() {
         <div className="grid gap-2"><Label>Nome de exibicao</Label><Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></div>
         <div className="grid gap-2"><Label>Matricula</Label><Input value={registration} onChange={(event) => setRegistration(event.target.value)} /></div>
         <div className="grid gap-2"><Label>Ano de entrada</Label><Select value={entryYear} onValueChange={setEntryYear}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{['2026','2025','2024','2023','2022'].map((year) => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent></Select></div>
-        <div className="grid gap-2"><Label>Escolha seu curso</Label><Select value={courseId} onValueChange={setCourseId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{initialAmoState.courses.map((course) => <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>)}</SelectContent></Select></div>
+        <div className="grid gap-2"><Label>Escolha seu curso</Label><Select value={courseId} onValueChange={setCourseId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{courses.map((course) => <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>)}</SelectContent></Select></div>
         <div className="grid gap-2"><Label>Data de nascimento</Label><Input type="date" value={birthDate} onChange={(event) => setBirthDate(event.target.value)} /></div>
         {error ? <div className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700">{error}</div> : null}
         <Button className="h-14 rounded-2xl bg-[#024284]">Avancar</Button>
@@ -79,8 +83,8 @@ export function RegisterPhotoPage() {
   const router = useRouter()
   const [avatar, setAvatar] = React.useState('')
   const finish = () => {
-    const pending = JSON.parse(window.localStorage.getItem('amo-pending-register') ?? '{}')
-    window.localStorage.setItem('amo-pending-register', JSON.stringify({ ...pending, avatar }))
+    const pending = JSON.parse(window.sessionStorage.getItem('amo-pending-register') ?? '{}')
+    window.sessionStorage.setItem('amo-pending-register', JSON.stringify({ ...pending, avatar }))
     router.push('/cadastro-final')
   }
   return (
@@ -95,45 +99,27 @@ export function RegisterPhotoPage() {
 }
 
 export function RegisterFinalPage() {
-  const { update, ids } = useAmoStore()
   const [saved, setSaved] = React.useState(false)
+  const [error, setError] = React.useState('')
+  const [retry, setRetry] = React.useState(0)
+  const sent = React.useRef(false)
 
   React.useEffect(() => {
-    if (saved) return
-    const raw = window.localStorage.getItem('amo-pending-register')
-    if (!raw) return
+    if (saved || sent.current) return
+    const raw = window.sessionStorage.getItem('amo-pending-register')
+    if (!raw) { setError('Dados do cadastro não encontrados. Volte ao início.'); return }
     const pending = JSON.parse(raw)
-    if (!pending.email || !pending.password || !pending.name) return
-    update((current) => {
-      if (current.users.some((user) => user.email.toLowerCase() === pending.email.toLowerCase())) return current
-      return {
-        ...current,
-        users: [
-          ...current.users,
-          {
-            id: ids.createId('u'),
-            name: pending.name,
-            displayName: pending.displayName,
-            email: pending.email,
-            password: pending.password,
-            role: 'Aluno',
-            registration: pending.registration,
-            courseId: pending.courseId,
-            birthDate: pending.birthDate,
-            entryYear: pending.entryYear,
-            avatar: pending.avatar,
-            active: true,
-          },
-        ],
-      }
-    })
-    window.localStorage.removeItem('amo-pending-register')
-    setSaved(true)
-  }, [ids, saved, update])
+    sent.current = true
+    apiRequest('auth/register/finish', 'POST', pending).then(() => {
+      window.sessionStorage.removeItem('amo-pending-register')
+      setSaved(true)
+    }).catch(cause => { sent.current = false; setError(cause instanceof Error ? cause.message : 'Cadastro não concluído.') })
+  }, [saved, retry])
 
   return (
     <Shell title="Obrigado pelo cadastro!">
-      <p className="text-center text-sm text-zinc-600">Cadastro concluido no prototipo. Retorne ao login para entrar no app.</p>
+      <p className="text-center text-sm text-zinc-600">{error || (saved ? 'Cadastro concluído. Retorne ao login para entrar no app.' : 'Concluindo cadastro...')}</p>
+      {error ? <Button variant="outline" onClick={() => { setError(''); setRetry(value => value + 1) }}>Tentar novamente</Button> : null}
       <Button asChild className="h-14 w-full rounded-2xl bg-[#024284]">
         <Link href="/">Login</Link>
       </Button>

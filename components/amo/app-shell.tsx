@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   Home,
   Menu,
+  LogOut,
   MessageSquare,
   Settings,
   Shield,
@@ -19,7 +20,7 @@ import {
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { useAmoStore } from '@/lib/amo/mock-store'
+import { apiRequest, useAmoStore } from '@/lib/amo/mock-store'
 import {
   Sheet,
   SheetContent,
@@ -32,7 +33,7 @@ const navItems = [
   { href: '/cursos', label: 'Cursos', icon: Home },
   { href: '/monitorias', label: 'Monitorias', icon: BookOpen },
   { href: '/forum', label: 'Forum', icon: MessageSquare },
-  { href: '/agendamentos', label: 'Agenda', icon: CalendarDays },
+  { href: '/agendamentos', label: 'Consultorias', icon: CalendarDays },
   { href: '/perfil', label: 'Perfil', icon: User },
 ]
 
@@ -86,7 +87,12 @@ function NavLink({
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { state } = useAmoStore()
+  const { state, currentUser } = useAmoStore()
+  const pathname = usePathname()
+  const isAdmin = currentUser.role === 'Administrador'
+  const denied = ((pathname.startsWith('/admin') || pathname.startsWith('/usuarios/novo')) && !isAdmin) ||
+    (pathname.startsWith('/forum/nova-duvida') && isAdmin)
+  const visibleSideItems = sideItems.filter(item => isAdmin || (item.href !== '/admin' && item.href !== '/usuarios/novo'))
   const featuredMonitoria = state.monitorias[0]
 
   return (
@@ -94,7 +100,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="fixed left-0 top-0 hidden h-full w-64 border-r bg-white px-4 py-5 lg:block">
         <AmoLogo />
         <nav className="mt-8 space-y-1">
-          {sideItems.map((item) => (
+          {visibleSideItems.map((item) => (
             <NavLink key={item.href} {...item} />
           ))}
         </nav>
@@ -124,7 +130,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <SheetTitle>AMO</SheetTitle>
                   </SheetHeader>
                   <nav className="space-y-1 px-4 py-5">
-                    {sideItems.map((item) => (
+                    {visibleSideItems.map((item) => (
                       <NavLink key={item.href} {...item} />
                     ))}
                   </nav>
@@ -141,18 +147,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <span className="sr-only">Notificacoes</span>
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+              {isAdmin ? <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
                 <Link href="/usuarios/novo">
                   <Users className="size-4" />
                   Novo usuario
                 </Link>
-              </Button>
+              </Button> : null}
+              <Button variant="ghost" size="icon" aria-label="Sair" onClick={async () => { await apiRequest('auth/logout', 'POST', {}); window.location.href = '/' }}><LogOut className="size-5" /></Button>
             </div>
           </div>
         </header>
 
         <main className="mx-auto max-w-6xl px-4 pb-24 pt-5 sm:pt-8 lg:pb-10">
-          {children}
+          {denied ? <div role="alert" className="rounded-md border p-6">Acesso não autorizado para este perfil.</div> : children}
         </main>
 
         <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-white px-2 pb-2 pt-1 lg:hidden">

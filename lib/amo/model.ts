@@ -1,7 +1,3 @@
-'use client'
-
-import { useEffect, useMemo, useState } from 'react'
-
 import {
   appointments as baseAppointments,
   courses as baseCourses,
@@ -18,7 +14,7 @@ export type AmoUser = {
   name: string
   displayName: string
   email: string
-  password: string
+  password?: string
   role: AmoUserRole
   registration: string
   courseId: string
@@ -44,6 +40,7 @@ export type AmoDiscipline = {
 
 export type AmoClass = {
   id: string
+  code: string
   courseId: string
   disciplineId: string
   semester: string
@@ -55,13 +52,24 @@ export type AmoMonitoria = {
   courseId: string
   disciplineId: string
   subject: string
-  monitorId: string
+  classIds: string[]
+  monitorIds: string[]
   professorId: string
   schedule: string
   room: string
   contact: string
   status: 'Aberta' | 'Lotada' | 'Em breve'
   tags: string[]
+}
+
+export type AmoEnrollment = {
+  id: string
+  monitoriaId: string
+  studentId: string
+  status: 'Pendente' | 'Aprovada' | 'Recusada' | 'Cancelada'
+  requestedAt: string
+  reviewedAt?: string
+  reviewedBy?: string
 }
 
 export type AmoAnswer = {
@@ -84,23 +92,49 @@ export type AmoQuestion = {
   updatedAt: string
   status: 'Aberta' | 'Respondida'
   likes: number
+  legacyLikes: number
+  likedUserIds: string[]
   views: number
   followingUserIds: string[]
-  reported: boolean
+}
+
+export type AmoReport = {
+  id: string
+  questionId: string
+  reporterId: string
+  reason: 'Conteúdo ofensivo' | 'Spam' | 'Informação incorreta' | 'Outro' | 'Motivo não informado'
+  details?: string
+  createdAt: string
+  status: 'Pendente' | 'Resolvida' | 'Descartada'
+  resolution?: string
+}
+
+export type AmoAvailability = {
+  id: string
+  monitoriaId: string
+  providerId: string
+  date: string
+  time: string
+  durationMinutes: number
+  type: 'Presencial' | 'Virtual'
+  location: string
+  status: 'Disponível' | 'Reservado'
 }
 
 export type AmoAppointment = {
   id: string
+  availabilityId?: string
   monitoriaId: string
   studentId: string
-  monitorId?: string
+  providerId?: string
   subject: string
   description: string
   date: string
   time: string
   type: 'Presencial' | 'Virtual'
+  durationMinutes: number
+  location: string
   status: 'Pendente' | 'Confirmado' | 'Negado' | 'Cancelado' | 'Concluido'
-  meetingUrl?: string
   tags: string[]
 }
 
@@ -136,16 +170,16 @@ export type AmoState = {
   disciplines: AmoDiscipline[]
   classes: AmoClass[]
   monitorias: AmoMonitoria[]
+  enrollments: AmoEnrollment[]
   questions: AmoQuestion[]
+  reports: AmoReport[]
   answers: AmoAnswer[]
+  availabilities: AmoAvailability[]
   appointments: AmoAppointment[]
   attendances: AmoAttendance[]
   notifications: AmoNotification[]
   settings: AmoSettings
 }
-
-const STORAGE_KEY = 'amo-data-v1'
-export const SESSION_KEY = 'amo-session'
 
 const now = '2026-06-02T11:00:00.000Z'
 
@@ -213,6 +247,7 @@ export const initialAmoState: AmoState = {
   classes: [
     {
       id: 't-alg-2026',
+      code: 'CC-ALG-01',
       courseId: 'cc',
       disciplineId: 'd-alg',
       semester: '2026.1',
@@ -224,7 +259,8 @@ export const initialAmoState: AmoState = {
     courseId: monitoria.courseId,
     disciplineId: `d-${monitoria.id}`,
     subject: monitoria.subject,
-    monitorId: index === 0 ? 'u-monitor' : 'u-student',
+    classIds: monitoria.id === 'alg' ? ['t-alg-2026'] : [],
+    monitorIds: ['u-monitor'],
     professorId: 'u-prof',
     schedule: monitoria.nextSlot,
     room: monitoria.room,
@@ -232,6 +268,17 @@ export const initialAmoState: AmoState = {
     status: monitoria.status,
     tags: monitoria.tags,
   })),
+  enrollments: [
+    {
+      id: 'enrollment-alg-student',
+      monitoriaId: 'alg',
+      studentId: 'u-student',
+      status: 'Aprovada',
+      requestedAt: now,
+      reviewedAt: now,
+      reviewedBy: 'u-prof',
+    },
+  ],
   questions: baseQuestions.map((question, index) => ({
     id: question.id,
     monitoriaId: question.monitoriaId,
@@ -243,10 +290,12 @@ export const initialAmoState: AmoState = {
     updatedAt: now,
     status: question.status === 'Aberta' ? 'Aberta' : 'Respondida',
     likes: index === 2 ? 12 : index + 2,
+    legacyLikes: index === 2 ? 12 : index + 2,
+    likedUserIds: [],
     views: question.views,
     followingUserIds: index === 0 ? ['u-student'] : [],
-    reported: false,
   })),
+  reports: [],
   answers: [
     {
       id: 'ans-1',
@@ -265,18 +314,23 @@ export const initialAmoState: AmoState = {
       correct: false,
     },
   ],
+  availabilities: [
+    { id: 'slot-alg-monitor', monitoriaId: 'alg', providerId: 'u-monitor', date: '2026-10-02', time: '16:00', durationMinutes: 30, type: 'Presencial', location: 'Lab 03', status: 'Disponível' },
+    { id: 'slot-alg-prof', monitoriaId: 'alg', providerId: 'u-prof', date: '2026-10-03', time: '14:00', durationMinutes: 30, type: 'Virtual', location: 'https://meet.google.com/amo-alg-prof', status: 'Disponível' },
+  ],
   appointments: baseAppointments.map((appointment, index) => ({
     id: appointment.id,
     monitoriaId: appointment.monitoriaId,
     studentId: index === 2 ? 'u-student' : 'u-student',
-    monitorId: 'u-monitor',
+    providerId: 'u-monitor',
     subject: appointment.topic,
     description: `Atendimento sobre ${appointment.topic}.`,
     date: index === 0 ? '2026-06-02' : index === 1 ? '2026-06-03' : '2026-05-28',
     time: appointment.time,
     type: index === 1 ? 'Virtual' : 'Presencial',
+    durationMinutes: 30,
+    location: index === 1 ? 'https://meet.google.com/amo-bd-2026' : 'Lab 03',
     status: appointment.status === 'Pendente' ? 'Pendente' : appointment.status === 'Confirmado' ? 'Confirmado' : 'Concluido',
-    meetingUrl: index === 1 ? 'https://meet.google.com/amo-bd-2026' : undefined,
     tags: [appointment.topic.split(' ')[0].toLowerCase()],
   })),
   attendances: [
@@ -300,92 +354,4 @@ export const initialAmoState: AmoState = {
     email: false,
     userRegistration: true,
   },
-}
-
-function createId(prefix: string) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-}
-
-function readState(): AmoState {
-  if (typeof window === 'undefined') return initialAmoState
-  const raw = window.localStorage.getItem(STORAGE_KEY)
-  if (!raw) return initialAmoState
-  try {
-    return { ...initialAmoState, ...JSON.parse(raw) } as AmoState
-  } catch {
-    return initialAmoState
-  }
-}
-
-function writeState(state: AmoState) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-}
-
-export function setAmoSession(userId: string) {
-  window.localStorage.setItem(SESSION_KEY, userId)
-  document.cookie = `${SESSION_KEY}=${userId}; path=/; max-age=604800; SameSite=Lax`
-}
-
-export function clearAmoSession() {
-  window.localStorage.removeItem(SESSION_KEY)
-  document.cookie = `${SESSION_KEY}=; path=/; max-age=0; SameSite=Lax`
-}
-
-export function useAmoStore() {
-  const [state, setState] = useState<AmoState>(initialAmoState)
-  const [sessionUserId, setSessionUserId] = useState('u-student')
-
-  useEffect(() => {
-    const stored = readState()
-    setState(stored)
-    writeState(stored)
-    setSessionUserId(window.localStorage.getItem(SESSION_KEY) ?? 'u-student')
-  }, [])
-
-  const commit = (updater: (current: AmoState) => AmoState) => {
-    setState((current) => {
-      const next = updater(current)
-      writeState(next)
-      return next
-    })
-  }
-
-  const currentUser = useMemo(
-    () => state.users.find((user) => user.id === sessionUserId) ?? state.users[1],
-    [sessionUserId, state.users],
-  )
-
-  const notify = (title: string, message: string, type: AmoNotification['type'] = 'sistema') => {
-    commit((current) => ({
-      ...current,
-      notifications: [
-        { id: createId('not'), title, message, time: 'agora', unread: true, type },
-        ...current.notifications,
-      ],
-    }))
-  }
-
-  return {
-    state,
-    currentUser,
-    setSessionUserId: (userId: string) => {
-      setAmoSession(userId)
-      setSessionUserId(userId)
-    },
-    reset: () => commit(() => initialAmoState),
-    notify,
-    update: commit,
-    ids: { createId },
-  }
-}
-
-export function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(new Date(value))
-}
-
-export function toDateLabel(value: string) {
-  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date(`${value}T12:00:00`))
 }
