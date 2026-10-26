@@ -61,7 +61,9 @@ npm run dev
 
 Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 
-O backend de demonstração roda nas rotas `/api` do próprio Next.js. Os dados e sessões ficam em memória e são reiniciados junto com o servidor. Para testar os perfis:
+O Web-AMO usa dados fictícios para demonstração. A base inicial é a mesma em desenvolvimento e na Vercel; as alterações, contas e sessões ficam salvas apenas no navegador usado no teste.
+
+Para testar os perfis:
 
 | Perfil | E-mail | Senha |
 | --- | --- | --- |
@@ -70,7 +72,7 @@ O backend de demonstração roda nas rotas `/api` do próprio Next.js. Os dados 
 | Professor | `helena.duarte@amo.edu` | `prof1234` |
 | Administrador | `admin@amo.edu` | `admin123` |
 
-O teste HTTP dos fluxos e permissões pode ser executado com `node scripts/http-smoke.mjs` enquanto o servidor local estiver ativo.
+O teste dos fluxos e permissões pode ser executado com `npm run test:smoke`.
 
 ---
 

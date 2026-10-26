@@ -2,26 +2,46 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { AmoState, AmoUser } from '@/lib/amo/model'
+import { handleApi, restoreMemory, serializeMemory } from '@/lib/amo/backend'
 
 export type {
   AmoAppointment, AmoAttendance, AmoAvailability, AmoClass, AmoCourse, AmoDiscipline,
   AmoEnrollment, AmoMonitoria, AmoNotification, AmoQuestion, AmoReport, AmoSettings, AmoUser, AmoUserRole,
 } from '@/lib/amo/model'
 
+type BrowserCookie = { value: string; expiresAt: number }
+type SavedDemo = { version: 1; memory?: string; cookies: Record<string, BrowserCookie> }
+const storageKey = 'amo-demo-v1'
+
 export async function apiRequest<T = unknown>(path: string, method = 'GET', body?: unknown): Promise<T> {
-  const response = await fetch(`/api/${path}`, {
-    method,
-    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
-    body: body === undefined ? undefined : JSON.stringify(body),
-    cache: 'no-store',
-  })
-  const result = await response.json()
-  if (!response.ok) {
-    const error = new Error(result.error || 'Não foi possível concluir a operação.') as Error & { status: number }
-    error.status = response.status
+  try {
+    const raw = localStorage.getItem(storageKey)
+    const saved = raw ? JSON.parse(raw) as SavedDemo : { version: 1 as const, cookies: {} }
+    if (saved.version !== 1 || !saved.cookies || typeof saved.cookies !== 'object' || Array.isArray(saved.cookies)) {
+      throw new Error('Dados de demonstração inválidos. Restaure a base local.')
+    }
+    restoreMemory(saved.memory)
+    const cookieValue = (name: string) => {
+      const cookie = saved.cookies[name]
+      if (!cookie || cookie.expiresAt <= Date.now()) { delete saved.cookies[name]; return undefined }
+      return cookie.value
+    }
+    const result = handleApi(method, path, body, {
+      session: cookieValue('amo-session'), register: cookieValue('amo-register'), recover: cookieValue('amo-recover'),
+    })
+    if (result.cookie) {
+      if (!result.cookie.maxAge) delete saved.cookies[result.cookie.name]
+      else saved.cookies[result.cookie.name] = { value: result.cookie.value, expiresAt: Date.now() + result.cookie.maxAge * 1000 }
+    }
+    saved.memory = JSON.stringify(serializeMemory())
+    localStorage.setItem(storageKey, JSON.stringify(saved))
+    return structuredClone(result.data) as T
+  } catch (cause) {
+    const error = cause instanceof Error ? cause : new Error('Não foi possível concluir a operação.')
+    const status = typeof (cause as { status?: unknown })?.status === 'number' ? (cause as { status: number }).status : 500
+    Object.assign(error, { status })
     throw error
   }
-  return result.data as T
 }
 
 type Snapshot = { state: AmoState; currentUser: AmoUser }
