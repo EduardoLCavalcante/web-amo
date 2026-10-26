@@ -5,7 +5,7 @@ import {
   notifications as baseNotifications,
   profiles,
   questions as baseQuestions,
-} from '@/lib/amo/mock-data'
+} from './mock-data.ts'
 
 export type AmoUserRole = 'Aluno' | 'Monitor' | 'Professor' | 'Administrador'
 

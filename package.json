@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:smoke": "node --experimental-strip-types --experimental-transform-types scripts/http-smoke.mjs",
     "lint": "eslint ."
   },
   "dependencies": {

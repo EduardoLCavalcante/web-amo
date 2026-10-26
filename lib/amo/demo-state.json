@@ -1,0 +1,487 @@
+{
+  "users": [
+    {
+      "id": "u-admin",
+      "name": "Patricia Vasconcelos",
+      "displayName": "Patricia",
+      "email": "admin@amo.edu",
+      "password": "admin123",
+      "role": "Administrador",
+      "registration": "ADM-001",
+      "courseId": "cc",
+      "active": true
+    },
+    {
+      "id": "u-student",
+      "name": "Camila Nunes",
+      "displayName": "Camila",
+      "email": "camila.nunes@amo.edu",
+      "password": "aluno123",
+      "role": "Aluno",
+      "registration": "202401234",
+      "courseId": "cc",
+      "entryYear": "2024",
+      "birthDate": "2003-08-14",
+      "active": true
+    },
+    {
+      "id": "u-prof",
+      "name": "Prof. Helena Duarte",
+      "displayName": "Helena",
+      "email": "helena.duarte@amo.edu",
+      "password": "prof1234",
+      "role": "Professor",
+      "registration": "SIAPE 145782",
+      "courseId": "cc",
+      "active": true
+    },
+    {
+      "id": "u-monitor",
+      "name": "Lucas Freire",
+      "displayName": "Lucas",
+      "email": "lucas.freire@amo.edu",
+      "password": "monitor1",
+      "role": "Monitor",
+      "registration": "202200987",
+      "courseId": "cc",
+      "active": true
+    },
+    {
+      "id": "5575fffa-a540-44d6-acfc-0eef73e61f26",
+      "name": "Eduardo",
+      "displayName": "Eduardo",
+      "email": "eduardocavalcante131@gmai.com",
+      "password": "uWjkcrBIQJQ9",
+      "role": "Professor",
+      "registration": "123456",
+      "courseId": "cc",
+      "active": true
+    },
+    {
+      "id": "2b364e87-5724-4838-96fa-8f4e1a67f8fe",
+      "name": "Aluno Demonstração",
+      "displayName": "Aluno Demo",
+      "email": "aluno.novo.1790526271046@amo.edu",
+      "password": "aluno1234",
+      "role": "Aluno",
+      "registration": "DEMO-1790526271644",
+      "courseId": "cc",
+      "birthDate": "2004-04-12",
+      "entryYear": "2026",
+      "active": true
+    },
+    {
+      "id": "eee06f11-f97b-4369-8264-0c2cf988420e",
+      "name": "Eduardo-Monitor",
+      "displayName": "Eduardo-Monitor",
+      "email": "monitor@email.com",
+      "password": "IYOhOBeo4xI9",
+      "role": "Monitor",
+      "registration": "123456",
+      "courseId": "cc",
+      "active": true
+    }
+  ],
+  "courses": [
+    {
+      "id": "cc",
+      "name": "Ciencia da Computacao",
+      "period": "2026.1",
+      "coordinator": "Prof. Helena Duarte",
+      "description": "Algoritmos, sistemas, dados e fundamentos de engenharia de software."
+    },
+    {
+      "id": "si",
+      "name": "Sistemas de Informacao",
+      "period": "2026.1",
+      "coordinator": "Prof. Marcos Lima",
+      "description": "Processos, banco de dados, gestao de tecnologia e produto digital."
+    },
+    {
+      "id": "eng",
+      "name": "Engenharia de Software",
+      "period": "2026.1",
+      "coordinator": "Prof. Ana Beatriz",
+      "description": "Qualidade, arquitetura, requisitos e construcao colaborativa de sistemas."
+    }
+  ],
+  "disciplines": [
+    {
+      "id": "d-alg",
+      "courseId": "cc",
+      "name": "Algoritmos e Estruturas de Dados"
+    },
+    {
+      "id": "d-bd",
+      "courseId": "si",
+      "name": "Banco de Dados"
+    },
+    {
+      "id": "d-web",
+      "courseId": "eng",
+      "name": "Desenvolvimento Web"
+    },
+    {
+      "id": "d-calc",
+      "courseId": "cc",
+      "name": "Calculo I"
+    }
+  ],
+  "classes": [
+    {
+      "id": "t-alg-2026",
+      "code": "CC-ALG-01",
+      "courseId": "cc",
+      "disciplineId": "d-alg",
+      "semester": "2026.1",
+      "studentIds": [
+        "u-student"
+      ]
+    },
+    {
+      "id": "513a78f7-88f5-4356-bd73-3b193a70d6b8",
+      "code": "CC-CALC-01",
+      "courseId": "cc",
+      "disciplineId": "d-calc",
+      "semester": "2026.1",
+      "studentIds": [
+        "2b364e87-5724-4838-96fa-8f4e1a67f8fe"
+      ]
+    }
+  ],
+  "monitorias": [
+    {
+      "id": "alg",
+      "courseId": "cc",
+      "disciplineId": "d-alg",
+      "subject": "Algoritmos e Estruturas de Dados",
+      "classIds": [
+        "t-alg-2026"
+      ],
+      "monitorIds": [
+        "u-monitor"
+      ],
+      "professorId": "u-prof",
+      "schedule": "Hoje, 16:00",
+      "room": "Lab 03",
+      "contact": "lucas.freire@amo.edu",
+      "status": "Aberta",
+      "tags": [
+        "listas",
+        "arvores",
+        "recursao"
+      ]
+    },
+    {
+      "id": "bd",
+      "courseId": "si",
+      "disciplineId": "d-bd",
+      "subject": "Banco de Dados",
+      "classIds": [],
+      "monitorIds": [
+        "u-monitor"
+      ],
+      "professorId": "u-prof",
+      "schedule": "Amanha, 09:00",
+      "room": "Sala 12",
+      "contact": "monitoria@amo.edu",
+      "status": "Aberta",
+      "tags": [
+        "sql",
+        "modelagem",
+        "normalizacao"
+      ]
+    },
+    {
+      "id": "web",
+      "courseId": "eng",
+      "disciplineId": "d-web",
+      "subject": "Desenvolvimento Web",
+      "classIds": [],
+      "monitorIds": [
+        "u-monitor"
+      ],
+      "professorId": "u-prof",
+      "schedule": "Quinta, 14:00",
+      "room": "Lab 01",
+      "contact": "monitoria@amo.edu",
+      "status": "Lotada",
+      "tags": [
+        "react",
+        "apis",
+        "testes"
+      ]
+    },
+    {
+      "id": "calc",
+      "courseId": "cc",
+      "disciplineId": "d-calc",
+      "subject": "Calculo I",
+      "classIds": [
+        "513a78f7-88f5-4356-bd73-3b193a70d6b8"
+      ],
+      "monitorIds": [
+        "u-monitor"
+      ],
+      "professorId": "u-prof",
+      "schedule": "Sexta, 10:00",
+      "room": "Sala 08",
+      "contact": "helena.duarte@amo.edu",
+      "status": "Em breve",
+      "tags": [
+        "limites",
+        "derivadas",
+        "integrais"
+      ]
+    },
+    {
+      "id": "ea8d10ab-356c-4b56-a4d0-4c3333baf1aa",
+      "courseId": "cc",
+      "disciplineId": "d-calc",
+      "subject": "Monitoria Calculo I",
+      "classIds": [
+        "513a78f7-88f5-4356-bd73-3b193a70d6b8"
+      ],
+      "professorId": "5575fffa-a540-44d6-acfc-0eef73e61f26",
+      "monitorIds": [
+        "eee06f11-f97b-4369-8264-0c2cf988420e"
+      ],
+      "schedule": "Horários publicados na agenda",
+      "room": "Conforme a consultoria",
+      "contact": "eduardocavalcante131@gmai.com",
+      "status": "Aberta",
+      "tags": [
+        "monitoria",
+        "calculo",
+        "i"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "monitoriaId": "alg",
+      "title": "Como decidir entre pilha e fila nesta lista?",
+      "tag": "listas",
+      "description": "No exercicio 4 a entrada chega em uma ordem, mas a saida esperada parece inverter alguns blocos. Queria entender o criterio para escolher pilha ou fila.",
+      "authorId": "u-student",
+      "createdAt": "2026-06-02T10:00:00.000Z",
+      "updatedAt": "2026-06-02T11:00:00.000Z",
+      "status": "Respondida",
+      "likes": 2,
+      "legacyLikes": 2,
+      "likedUserIds": [],
+      "views": 42,
+      "followingUserIds": [
+        "u-student"
+      ]
+    },
+    {
+      "id": "q2",
+      "monitoriaId": "bd",
+      "title": "Duvida sobre chave composta no DER",
+      "tag": "modelagem",
+      "description": "Montei o relacionamento, mas fiquei em duvida se a chave parcial entra junto com as duas chaves estrangeiras.",
+      "authorId": "u-student",
+      "createdAt": "2026-06-02T09:00:00.000Z",
+      "updatedAt": "2026-06-02T11:00:00.000Z",
+      "status": "Aberta",
+      "likes": 3,
+      "legacyLikes": 3,
+      "likedUserIds": [],
+      "views": 28,
+      "followingUserIds": []
+    },
+    {
+      "id": "q3",
+      "monitoriaId": "web",
+      "title": "Checklist para entregar o trabalho de API",
+      "tag": "apis",
+      "description": "A entrega deve conter rotas documentadas, validacao dos dados de entrada, tratamento de erro e testes dos principais fluxos.",
+      "authorId": "u-monitor",
+      "createdAt": "2026-06-01T14:00:00.000Z",
+      "updatedAt": "2026-06-02T11:00:00.000Z",
+      "status": "Respondida",
+      "likes": 12,
+      "legacyLikes": 12,
+      "likedUserIds": [],
+      "views": 91,
+      "followingUserIds": []
+    }
+  ],
+  "reports": [],
+  "answers": [
+    {
+      "id": "ans-1",
+      "questionId": "q1",
+      "authorId": "u-monitor",
+      "body": "Use fila quando a ordem de atendimento precisa ser preservada. Use pilha quando o ultimo item inserido deve sair primeiro.",
+      "createdAt": "2026-06-02T10:20:00.000Z",
+      "correct": true
+    },
+    {
+      "id": "ans-2",
+      "questionId": "q1",
+      "authorId": "u-prof",
+      "body": "Compare a saida esperada com a ordem de entrada antes de escolher a estrutura.",
+      "createdAt": "2026-06-02T10:30:00.000Z",
+      "correct": false
+    }
+  ],
+  "availabilities": [
+    {
+      "id": "slot-alg-monitor",
+      "monitoriaId": "alg",
+      "providerId": "u-monitor",
+      "date": "2026-10-02",
+      "time": "16:00",
+      "durationMinutes": 30,
+      "type": "Presencial",
+      "location": "Lab 03",
+      "status": "Disponível"
+    },
+    {
+      "id": "slot-alg-prof",
+      "monitoriaId": "alg",
+      "providerId": "u-prof",
+      "date": "2026-10-03",
+      "time": "14:00",
+      "durationMinutes": 30,
+      "type": "Virtual",
+      "location": "https://meet.google.com/amo-alg-prof",
+      "status": "Disponível"
+    }
+  ],
+  "appointments": [
+    {
+      "id": "a1",
+      "monitoriaId": "alg",
+      "studentId": "u-student",
+      "providerId": "u-monitor",
+      "subject": "Lista de pilhas e filas",
+      "description": "Atendimento sobre Lista de pilhas e filas.",
+      "date": "2026-06-02",
+      "time": "16:00",
+      "type": "Presencial",
+      "durationMinutes": 30,
+      "location": "Lab 03",
+      "status": "Confirmado",
+      "tags": [
+        "lista"
+      ]
+    },
+    {
+      "id": "a2",
+      "monitoriaId": "bd",
+      "studentId": "u-student",
+      "providerId": "u-monitor",
+      "subject": "DER e normalizacao",
+      "description": "Atendimento sobre DER e normalizacao.",
+      "date": "2026-06-03",
+      "time": "09:00",
+      "type": "Virtual",
+      "durationMinutes": 30,
+      "location": "https://meet.google.com/amo-bd-2026",
+      "status": "Pendente",
+      "tags": [
+        "der"
+      ]
+    },
+    {
+      "id": "a3",
+      "monitoriaId": "web",
+      "studentId": "u-student",
+      "providerId": "u-monitor",
+      "subject": "Autenticacao no frontend",
+      "description": "Atendimento sobre Autenticacao no frontend.",
+      "date": "2026-05-28",
+      "time": "14:00",
+      "type": "Presencial",
+      "durationMinutes": 30,
+      "location": "Lab 03",
+      "status": "Concluido",
+      "tags": [
+        "autenticacao"
+      ]
+    }
+  ],
+  "attendances": [
+    {
+      "id": "freq-1",
+      "monitoriaId": "alg",
+      "date": "2026-06-02",
+      "studentId": "u-student",
+      "present": true,
+      "preConfirmed": true,
+      "difficulty": "Pilhas e filas"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "n1",
+      "title": "Resposta recebida",
+      "message": "Lucas respondeu sua duvida em Algoritmos.",
+      "time": "agora",
+      "unread": true,
+      "type": "forum"
+    },
+    {
+      "id": "n2",
+      "title": "Agendamento confirmado",
+      "message": "Sua monitoria de Banco de Dados foi confirmada para amanha.",
+      "time": "20 min",
+      "unread": true,
+      "type": "agenda"
+    },
+    {
+      "id": "n3",
+      "title": "Preferencias salvas",
+      "message": "As configuracoes de notificacao foram atualizadas.",
+      "time": "ontem",
+      "unread": false,
+      "type": "sistema"
+    }
+  ],
+  "settings": {
+    "forum": true,
+    "appointments": true,
+    "email": false,
+    "userRegistration": true
+  },
+  "enrollments": [
+    {
+      "id": "c5563373-17b5-454e-9977-687b86144ccb",
+      "monitoriaId": "calc",
+      "studentId": "u-student",
+      "status": "Pendente",
+      "requestedAt": "2026-09-28T23:14:00.968Z"
+    },
+    {
+      "id": "16511c97-c16d-4201-b083-662a18c1fb42",
+      "monitoriaId": "alg",
+      "studentId": "u-student",
+      "status": "Aprovada",
+      "requestedAt": "2026-09-28T22:35:13.771Z",
+      "reviewedAt": "2026-09-28T22:35:13.771Z",
+      "reviewedBy": "u-prof"
+    },
+    {
+      "id": "31804faa-7cab-4983-8455-5aefdbb088c5",
+      "monitoriaId": "calc",
+      "studentId": "2b364e87-5724-4838-96fa-8f4e1a67f8fe",
+      "status": "Aprovada",
+      "requestedAt": "2026-09-28T22:35:13.771Z",
+      "reviewedAt": "2026-09-28T22:35:13.771Z",
+      "reviewedBy": "u-prof"
+    },
+    {
+      "id": "3627d557-0eba-45a5-afc2-63ab283cbbc9",
+      "monitoriaId": "ea8d10ab-356c-4b56-a4d0-4c3333baf1aa",
+      "studentId": "2b364e87-5724-4838-96fa-8f4e1a67f8fe",
+      "status": "Aprovada",
+      "requestedAt": "2026-09-28T22:35:13.771Z",
+      "reviewedAt": "2026-09-28T22:35:13.771Z",
+      "reviewedBy": "5575fffa-a540-44d6-acfc-0eef73e61f26"
+    }
+  ]
+}

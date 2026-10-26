@@ -1,13 +1,17 @@
 import assert from 'node:assert/strict'
+import { handleApi, restoreMemory, serializeMemory } from '../lib/amo/backend.ts'
 
-const base = process.env.AMO_URL ?? 'http://localhost:3000'
+let memory
 async function call(path, method = 'GET', body, cookie) {
-  const response = await fetch(`${base}/api/${path}`, {
-    method,
-    headers: { ...(body === undefined ? {} : { 'content-type': 'application/json' }), ...(cookie ? { cookie } : {}) },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  })
-  return { status: response.status, body: await response.json(), cookie: response.headers.get('set-cookie')?.split(';')[0] }
+  restoreMemory(memory)
+  const context = Object.fromEntries((cookie ?? '').split('; ').filter(Boolean).map(item => item.split('=')))
+  try {
+    const result = handleApi(method, path, body, { session: context['amo-session'], register: context['amo-register'], recover: context['amo-recover'] })
+    memory = JSON.stringify(serializeMemory())
+    return { status: result.status ?? 200, body: { data: result.data }, cookie: result.cookie && `${result.cookie.name}=${result.cookie.value}` }
+  } catch (error) {
+    return { status: error.status ?? 500, body: { error: error.message } }
+  }
 }
 async function login(email, password) {
   const result = await call('auth/login', 'POST', { email, password })
@@ -47,7 +51,10 @@ try {
   const secondLike = await call('forum/questions/q1/like', 'POST', {}, aluno)
   assert.equal(firstLike.body.data.likes, secondLike.body.data.likes + 1)
   assert.equal((await call('forum/questions/q3/like', 'POST', {}, aluno)).status, 403)
+  const existingCalc = (await call('bootstrap', 'GET', undefined, aluno)).body.data.state.enrollments.find(item => item.monitoriaId === 'calc' && ['Pendente', 'Aprovada'].includes(item.status))
+  if (existingCalc) assert.equal((await call(`enrollments/${existingCalc.id}`, 'PATCH', { action: existingCalc.status === 'Pendente' ? 'cancel' : 'leave' }, aluno)).status, 200)
   const professorEnrollment = await call('enrollments', 'POST', { monitoriaId: 'calc' }, aluno)
+  assert.equal(professorEnrollment.status, 201)
   assert.equal((await call(`enrollments/${professorEnrollment.body.data.id}`, 'PATCH', { action: 'cancel' }, aluno)).status, 200)
   assert.equal((await call('enrollments', 'POST', { monitoriaId: 'calc' }, aluno)).status, 201)
   assert.equal((await call(`enrollments/${professorEnrollment.body.data.id}`, 'PATCH', { action: 'approve' }, professor)).status, 200)
@@ -94,7 +101,7 @@ try {
   const alg = adminData.state.monitorias.find(item => item.id === 'alg')
   assert.equal((await call('admin/monitorias/alg', 'PATCH', { classIds: alg.classIds, professorId: alg.professorId, monitorIds: [...alg.monitorIds, approved.body.data.user.id] }, admin)).status, 200)
   assert.equal((await call('attendance', 'PUT', { monitoriaId: 'alg', studentId: 'u-student', date: '2099-01-02', present: true, preConfirmed: true }, newMonitor)).status, 200)
-  console.log('HTTP smoke: sessões, papéis, fórum, denúncias, vínculos, consultorias e frequência OK')
+  console.log('Mock smoke: sessões, papéis, fórum, denúncias, vínculos, consultorias e frequência OK')
 } finally {
   assert.equal((await call('admin/reset', 'POST', {}, admin)).status, 200)
 }

@@ -1,7 +1,5 @@
-import { randomBytes, randomUUID } from 'node:crypto'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
-import { initialAmoState, type AmoAppointment, type AmoAttendance, type AmoAvailability, type AmoEnrollment, type AmoMonitoria, type AmoNotification, type AmoQuestion, type AmoReport, type AmoSettings, type AmoState, type AmoUser, type AmoUserRole } from './model'
+import { initialAmoState, type AmoAppointment, type AmoAttendance, type AmoAvailability, type AmoEnrollment, type AmoMonitoria, type AmoNotification, type AmoQuestion, type AmoReport, type AmoSettings, type AmoState, type AmoUser, type AmoUserRole } from './model.ts'
+import demoState from './demo-state.json' with { type: 'json' }
 
 type PendingCode = { email: string; code: string; expires: number; verified: boolean; password?: string }
 type StaffRequest = { id: string; role: 'Monitor' | 'Professor'; name: string; email: string; registration: string; courseId: string; disciplineId: string; status: 'Pendente' | 'Aprovada' | 'Rejeitada' }
@@ -18,11 +16,17 @@ type Memory = {
   userSettings: Map<string, AmoSettings>
   userNotifications: Map<string, AmoNotification[]>
 }
-// ponytail: o JSON local atende uma instância de desenvolvimento; use banco compartilhado em produção.
-const stateFile = resolve(process.cwd(), process.env.AMO_STATE_FILE ?? '.amo-state.json')
-const processMemory = process as NodeJS.Process & { __amoMemory?: Memory }
-const memory: Memory = processMemory.__amoMemory ??= {
-  state: existsSync(stateFile) ? JSON.parse(readFileSync(stateFile, 'utf8')) as AmoState : structuredClone(initialAmoState), registrationOpen: true,
+type SerializedMemory = Omit<Memory, 'sessions' | 'registrationCodes' | 'recoveryCodes' | 'userSettings' | 'userNotifications'> & {
+  sessions: [string, string][]
+  registrationCodes: [string, PendingCode][]
+  recoveryCodes: [string, PendingCode][]
+  userSettings: [string, AmoSettings][]
+  userNotifications: [string, AmoNotification[]][]
+}
+const seed = demoState as AmoState
+const freshState = () => structuredClone(seed)
+const memory: Memory = {
+  state: freshState(), registrationOpen: true,
   sessions: new Map(), registrationCodes: new Map(), recoveryCodes: new Map(),
   requests: [], userSettings: new Map(), userNotifications: new Map(),
 }
@@ -32,7 +36,7 @@ const { sessions, registrationCodes, recoveryCodes, requests, userSettings, user
 
 function migrateState() {
   state.reports ??= []
-  state.availabilities ??= structuredClone(initialAmoState.availabilities)
+  state.availabilities ??= structuredClone(seed.availabilities)
   for (const item of state.classes) item.code ??= `${item.semester}-${item.id}`.toUpperCase()
   for (const item of state.monitorias) {
     const legacy = item as AmoMonitoria & { monitorId?: string }
@@ -73,10 +77,48 @@ export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message) }
 }
 const fail = (status: number, message: string): never => { throw new ApiError(status, message) }
-const id = () => randomUUID()
+const randomToken = (size: number) => Array.from(crypto.getRandomValues(new Uint8Array(size)), byte => byte.toString(16).padStart(2, '0')).join('')
+const id = () => crypto.randomUUID()
+
+function validSnapshot(value: unknown): value is SerializedMemory {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const snapshot = value as Record<string, unknown>
+  const state = snapshot.state as Record<string, unknown> | undefined
+  const arrays = ['users', 'courses', 'disciplines', 'classes', 'monitorias', 'enrollments', 'questions', 'reports', 'answers', 'availabilities', 'appointments', 'attendances', 'notifications']
+  const entries = ['sessions', 'registrationCodes', 'recoveryCodes', 'userSettings', 'userNotifications']
+  return !!state && arrays.every(key => Array.isArray(state[key]))
+    && !!state.settings && typeof state.settings === 'object'
+    && typeof snapshot.registrationOpen === 'boolean'
+    && Array.isArray(snapshot.requests)
+    && entries.every(key => Array.isArray(snapshot[key]) && (snapshot[key] as unknown[]).every(entry => Array.isArray(entry) && entry.length === 2 && typeof entry[0] === 'string'))
+}
+
+export function restoreMemory(raw?: string) {
+  const saved: SerializedMemory | undefined = raw === undefined ? undefined : JSON.parse(raw) as unknown as SerializedMemory
+  if (raw !== undefined && !validSnapshot(saved)) throw new Error('Dados de demonstração inválidos. Restaure a base local.')
+  memory.state = state = saved ? saved.state : freshState()
+  memory.registrationOpen = registrationOpen = saved ? saved.registrationOpen : true
+  const maps = [
+    [sessions, saved?.sessions], [registrationCodes, saved?.registrationCodes], [recoveryCodes, saved?.recoveryCodes],
+    [userSettings, saved?.userSettings], [userNotifications, saved?.userNotifications],
+  ] as const
+  for (const [map, entries] of maps) {
+    map.clear()
+    for (const [key, entry] of entries ?? []) map.set(key, entry as never)
+  }
+  requests.splice(0, requests.length, ...(saved?.requests ?? []))
+  migrateState()
+}
+
+export function serializeMemory(): SerializedMemory {
+  return {
+    ...memory,
+    sessions: [...sessions], registrationCodes: [...registrationCodes], recoveryCodes: [...recoveryCodes],
+    userSettings: [...userSettings], userNotifications: [...userNotifications],
+  }
+}
+
 migrateState()
-export const persistState = () => writeFileSync(stateFile, JSON.stringify(state, null, 2), { mode: 0o600 })
-persistState()
 const record = (value: unknown): Record<string, unknown> => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : fail(400, 'Corpo inválido.')
 const value = (body: Record<string, unknown>, key: string, min = 1) => typeof body[key] === 'string' && (body[key] as string).trim().length >= min ? (body[key] as string).trim() : fail(400, `Campo ${key} inválido.`)
 const email = (body: Record<string, unknown>) => {
@@ -173,9 +215,9 @@ function bootstrap(user: AmoUser) {
   return { currentUser: safeUser(user, true), state: filtered }
 }
 function newCode(map: Map<string, PendingCode>, pending: Omit<PendingCode, 'code' | 'expires' | 'verified'>) {
-  const token = randomBytes(24).toString('base64url')
-  map.set(token, { ...pending, code: String(randomBytes(4).readUInt32BE() % 1_000_000).padStart(6, '0'), expires: Date.now() + 600_000, verified: false })
-  return token
+  const key = randomToken(24)
+  map.set(key, { ...pending, code: String(crypto.getRandomValues(new Uint32Array(1))[0] % 1_000_000).padStart(6, '0'), expires: Date.now() + 600_000, verified: false })
+  return key
 }
 function pending(map: Map<string, PendingCode>, token?: string) {
   const item = token && map.get(token)
@@ -199,7 +241,7 @@ export function handleApi(method: string, path: string, rawBody: unknown, contex
     const address = email(body)
     const user = state.users.find(item => item.email.toLowerCase() === address && item.password === value(body, 'password'))
     if (!user?.active) return fail(401, 'E-mail ou senha inválidos.')
-    const token = randomBytes(32).toString('base64url')
+    const token = crypto.randomUUID() + randomToken(16)
     sessions.set(token, user.id)
     return { data: safeUser(user, true), cookie: cookie('amo-session', token, 604800) }
   }
@@ -576,7 +618,7 @@ export function handleApi(method: string, path: string, rawBody: unknown, contex
       uniqueEmail(address)
       const courseId = value(body, 'courseId')
       existingCourse(courseId)
-      const temporaryPassword = `${randomBytes(8).toString('base64url')}9`
+      const temporaryPassword = `${randomToken(8)}9`
       const newUser: AmoUser = { id: id(), name: value(body, 'name'), displayName: value(body, 'name').split(' ')[0], email: address, password: temporaryPassword, role, registration: value(body, 'registration'), courseId, active: true }
       assignMonitorias(newUser, body.monitoriaIds)
       state.users.push(newUser)
@@ -596,7 +638,7 @@ export function handleApi(method: string, path: string, rawBody: unknown, contex
       if (decision === 'reject') { request.status = 'Rejeitada'; return { data: request } }
       if (decision !== 'approve') fail(400, 'Decisão inválida.')
       uniqueEmail(request.email)
-      const temporaryPassword = `${randomBytes(8).toString('base64url')}9`
+      const temporaryPassword = `${randomToken(8)}9`
       const newUser: AmoUser = { id: id(), name: request.name, displayName: request.name.split(' ')[0], email: request.email, password: temporaryPassword, role: request.role, registration: request.registration, courseId: request.courseId, active: true }
       assignMonitorias(newUser, body.monitoriaIds)
       state.users.push(newUser)
@@ -622,7 +664,7 @@ export function handleApi(method: string, path: string, rawBody: unknown, contex
       return { data: true }
     }
     if (method === 'POST' && path === 'admin/reset') {
-      state = memory.state = structuredClone(initialAmoState)
+      state = memory.state = freshState()
       requests.length = 0; userSettings.clear(); userNotifications.clear(); registrationOpen = memory.registrationOpen = true
       return { data: true }
     }
